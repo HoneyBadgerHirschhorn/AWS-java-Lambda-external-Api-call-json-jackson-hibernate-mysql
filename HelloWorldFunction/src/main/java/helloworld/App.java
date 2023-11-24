@@ -139,8 +139,8 @@ public class App implements RequestHandler<Object, String> {
     }
 
     public static void truncateTable(){
-        String userName = "admin";
-        String passWord = "adminadmin";
+        String userName = "*****";
+        String passWord = "**********";
         String sqlUrl = "jdbc:mysql://database-3.cqqfats78sl1.us-east-1.rds.amazonaws.com:3306/Crypto_Stuff";
         String trunk = "truncate table currency";
 
