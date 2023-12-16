@@ -1,5 +1,4 @@
 {
-    "_comment": "THIS IS AWS EVENT PROXY DEFAULT JSON STUFF. MY PROJECT DOES NOT USE THIS SO IGNORE ALL OF IT. MY PROJECT USES THE JSON FROM THE API CALL AS SEEN IN THE APP CLASS"
     "body": "{\"message\": \"hello world\"}",
     "resource": "/{proxy+}",
     "path": "/path/to/resource",

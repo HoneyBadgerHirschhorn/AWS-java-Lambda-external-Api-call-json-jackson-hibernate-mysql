@@ -4,7 +4,7 @@ version = 0.1
 
 [default]
 [default.global.parameters]
-stack_name = "Hibernate3"
+stack_name = "AWS-API-Hibernate"
 
 [default.build.parameters]
 cached = true

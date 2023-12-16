@@ -1,7 +1,20 @@
 package helloworld;
 
+
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
+import org.hibernate.SessionFactory;
+
+import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.AWSCredentialsProvider;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.auth.profile.ProfileCredentialsProvider;
+import com.amazonaws.services.lambda.model.ServiceException;
+import com.amazonaws.services.lambda.runtime.Context;
+import com.amazonaws.services.lambda.runtime.RequestHandler;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,18 +32,22 @@ import org.apache.hc.core5.net.URIBuilder;
 import org.hibernate.SessionFactory;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-import org.hibernate.*;
+import org.hibernate.cfg.Configuration;
+import com.amazonaws.regions.Regions;
+import com.amazonaws.services.lambda.AWSLambda;
+import com.amazonaws.services.lambda.AWSLambdaClientBuilder;
+import com.amazonaws.services.lambda.model.InvokeRequest;
+import com.amazonaws.services.lambda.model.InvokeResult;
 
 import java.io.IOException;
-
 import java.net.URISyntaxException;
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.*;
-import org.hibernate.cfg.Configuration;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * Handler for requests to Lambda function.
@@ -83,6 +100,7 @@ public class App implements RequestHandler<Object, String> {
                 currencyEntity.setPrice(node1.getQuote().getUSD().getPrice());
                 sss.merge(currencyEntity); // merge works better vs persist/save/saveorupdate
                 transaction.commit();
+
                 System.out.println("Name   "+node1.getName()+"    Symbol   "+node1.getSymbol()+
                         "     Price    "+node1.getQuote().getUSD().getPrice());
                 System.out.println("");
@@ -101,6 +119,7 @@ public class App implements RequestHandler<Object, String> {
             if (sessionFactory.isOpen()){
             sessionFactory.close();
         }
+        invoke();
         return null;
     }
     public static String makeAPICall(String uri, List<NameValuePair> parameters)
@@ -139,8 +158,8 @@ public class App implements RequestHandler<Object, String> {
     }
 
     public static void truncateTable(){
-        String userName = "*****";
-        String passWord = "**********";
+        String userName = "admin";
+        String passWord = "adminadmin";
         String sqlUrl = "jdbc:mysql://database-3.cqqfats78sl1.us-east-1.rds.amazonaws.com:3306/Crypto_Stuff";
         String trunk = "truncate table currency";
 
@@ -155,7 +174,28 @@ public class App implements RequestHandler<Object, String> {
         }
     }
 
-        //this was used to test manual input into database. Irrelevant now
+    //this triggers other lambda
+    public void invoke(){
+        String functionName = "arn:aws:lambda:us-east-1:925431479966:function:rules-working-HelloWorldFunction-zbUvlEmsTsKD";
+        InvokeRequest invokeRequest = new InvokeRequest().withFunctionName(functionName);
+        InvokeResult invokeResult = null;
+
+        try {
+            AWSLambda awsLambda = AWSLambdaClientBuilder.standard()
+//                    .withCredentials(new ProfileCredentialsProvider())
+                    .withRegion(Regions.US_EAST_1).build();
+            invokeResult = awsLambda.invoke(invokeRequest);
+
+        } catch (ServiceException e) {
+            System.out.println(e);
+        }
+        System.out.println(Objects.requireNonNull(invokeResult).getStatusCode());
+
+    }
+
+
+
+    //this was used to test manual input into database. Irrelevant now
 //    public void testEntry(){
 //        Session sss = getSessionFromFactory();
 //        Transaction transaction = sss.beginTransaction();
