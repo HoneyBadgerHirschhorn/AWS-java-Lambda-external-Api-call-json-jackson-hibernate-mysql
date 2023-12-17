@@ -44,7 +44,7 @@ import java.util.Objects;
 public class App implements RequestHandler<Object, String> {
 
     private static SessionFactory sessionFactory;
-    private static final String apiKey = "e59fb463-529d-4188-8aa6-099b1e7ab9f1";
+    private static final String apiKey = "yourCoinBaseApiKey";
 
 
 
@@ -147,10 +147,10 @@ public class App implements RequestHandler<Object, String> {
     }
 
     public static void truncateTable(){
-        String userName = "admin";
-        String passWord = "adminadmin";
-        String sqlUrl = "jdbc:mysql://database-3.cqqfats78sl1.us-east-1.rds.amazonaws.com:3306/Crypto_Stuff";
-        String trunk = "truncate table currency";
+        String userName = "userName";
+        String passWord = "password";
+        String sqlUrl = "jdbc:mysql://dataBaseName.cqqfats78sl1.us-east-1.rds.amazonaws.com:3306/tableName";
+        String trunk = "truncate table tableName";
 
         try{
             Connection connection = DriverManager.getConnection(sqlUrl, userName, passWord);
@@ -165,7 +165,8 @@ public class App implements RequestHandler<Object, String> {
 
     //this triggers other lambda
     public void invoke(){
-        String functionName = "arn:aws:lambda:us-east-1:925431479966:function:rules-working-HelloWorldFunction-zbUvlEmsTsKD";
+        //this is your function arn. Copy whole thing and paste for this string.
+        String functionName = "fullFunctionArnPaste";
         InvokeRequest invokeRequest = new InvokeRequest().withFunctionName(functionName);
         InvokeResult invokeResult = null;
 
@@ -179,25 +180,10 @@ public class App implements RequestHandler<Object, String> {
             System.out.println(e);
         }
         System.out.println(Objects.requireNonNull(invokeResult).getStatusCode());
-
     }
 
 
 
-    //this was used to test manual input into database. Irrelevant now
-//    public void testEntry(){
-//        Session sss = getSessionFromFactory();
-//        Transaction transaction = sss.beginTransaction();
-//        truncateTable();
-//        CurrencyEntity currencyEntity = new CurrencyEntity();
-////      currencyEntity.setId(1); // this does not work for autoID tables
-//        currencyEntity.setName("Bitcoin");
-//        currencyEntity.setSymbol("BTC");
-//        currencyEntity.setPrice("35000");
-//        sss.persist(currencyEntity);
-//        transaction.commit();
-//        sss.close();
-//    }
     }
 
 
