@@ -12,6 +12,7 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mysql.cj.protocol.Resultset;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
@@ -44,17 +45,12 @@ import java.util.Objects;
 public class App implements RequestHandler<Object, String> {
 
     private static SessionFactory sessionFactory;
-    private static final String apiKey = "yourCoinBaseApiKey";
-
-
+    private static final String apiKey = "e59fb463-529d-4188-8aa6-099b1e7ab9f1";
 
     public String handleRequest(Object thing, Context context) {
 
-        //connects to DB with both hibernate and JDBC (Could not truncate with hibernate)
-        //JDBC connection terminated after truncate method. Hibernate still active.
-        //truncate used for now. May change to update later
+        //establishes hibernate connection
         Session sss = getSessionFromFactory();
-        truncateTable();
 
         //pre-reqs for CoinBase API
         String uri = "https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest";
@@ -78,22 +74,36 @@ public class App implements RequestHandler<Object, String> {
             mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
             Results root = mapper.readValue(result, Results.class);
 
-            //enters data in DB and prints out results
+            //Hibernate prep stuff
+            Transaction transaction = sss.beginTransaction();
             CurrencyEntity currencyEntity = new CurrencyEntity();
+            CurrencyEntity secondCoin = new CurrencyEntity();
+            int ct = 1;
+
+            //uses hibernate to get data from JSON results and enter it into DB
             for (int i = 0; i < root.getData().size(); i++){
-                Transaction transaction = sss.beginTransaction();
                 Entry node1 = root.getData().get(i);
-//              currencyEntity.setId(node1.getId()); this does not work for autoID tables
                 currencyEntity.setName(node1.getName());
                 currencyEntity.setSymbol(node1.getSymbol());
                 currencyEntity.setPrice(node1.getQuote().getUSD().getPrice());
-                sss.merge(currencyEntity); // merge works better vs persist/save/saveorupdate
-                transaction.commit();
 
-                System.out.println("Name   "+node1.getName()+"    Symbol   "+node1.getSymbol()+
-                        "     Price    "+node1.getQuote().getUSD().getPrice());
-                System.out.println("");
+                if (!Objects.equals(sss.get(CurrencyEntity.class, ct), null)){
+                    secondCoin = sss.get(CurrencyEntity.class, ct);
+                    for (int j = 0; j < root.getData().size(); j ++) {
+                       if (Objects.equals(currencyEntity.getSymbol(), secondCoin.getSymbol())) {
+                        secondCoin.setPrice(currencyEntity.getPrice());
+                        sss.update(secondCoin);
+                        }
+                    }
+
+                }
+            else {
+                    sss.merge(currencyEntity);
+                }
+                ct++;
             }
+            sss.flush();
+            transaction.commit();
         }
         //in case api call fails
         catch (IOException e) {
@@ -108,11 +118,12 @@ public class App implements RequestHandler<Object, String> {
             if (sessionFactory.isOpen()){
             sessionFactory.close();
         }
+        //this triggers second lambda
         invoke();
         return null;
     }
     public static String makeAPICall(String uri, List<NameValuePair> parameters)
-//CoinBase API
+        //CoinBase API
         throws URISyntaxException, IOException {
         String response_content = "";
         URIBuilder query = new URIBuilder(uri);
@@ -146,33 +157,34 @@ public class App implements RequestHandler<Object, String> {
         return sessionFactory.openSession();
     }
 
-    public static void truncateTable(){
-        String userName = "userName";
-        String passWord = "password";
-        String sqlUrl = "jdbc:mysql://dataBaseName.cqqfats78sl1.us-east-1.rds.amazonaws.com:3306/tableName";
-        String trunk = "truncate table tableName";
+//    This was used in an earlier version of the program. Obsolete now.
+//    public static void truncateTable(){
+//
+//        String userName = "admin";
+//        String passWord = "adminadmin";
+//        String sqlUrl = "jdbc:mysql://database-3.cqqfats78sl1.us-east-1.rds.amazonaws.com:3306/Crypto_Stuff";
+//        String trunk = "truncate table currency";
+//
+//        try{
+//            Connection connection = DriverManager.getConnection(sqlUrl, userName, passWord);
+//            Statement statement = connection.createStatement();
+//            statement.executeUpdate(trunk);
+//            statement.close();
+//            connection.close();
+//        } catch (SQLException e) {
+//            throw new RuntimeException(e);
+//        }
+//    }
 
-        try{
-            Connection connection = DriverManager.getConnection(sqlUrl, userName, passWord);
-            Statement statement = connection.createStatement();
-            statement.executeUpdate(trunk);
-            statement.close();
-            connection.close();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
-    //this triggers other lambda
     public void invoke(){
-        //this is your function arn. Copy whole thing and paste for this string.
-        String functionName = "fullFunctionArnPaste";
+        //this triggers other lambda
+        String functionName = "arn:aws:lambda:us-east-1:925431479966:function:rules-working-HelloWorldFunction-zbUvlEmsTsKD";
         InvokeRequest invokeRequest = new InvokeRequest().withFunctionName(functionName);
         InvokeResult invokeResult = null;
 
         try {
             AWSLambda awsLambda = AWSLambdaClientBuilder.standard()
-//                    .withCredentials(new ProfileCredentialsProvider())
                     .withRegion(Regions.US_EAST_1).build();
             invokeResult = awsLambda.invoke(invokeRequest);
 
@@ -180,10 +192,8 @@ public class App implements RequestHandler<Object, String> {
             System.out.println(e);
         }
         System.out.println(Objects.requireNonNull(invokeResult).getStatusCode());
-    }
 
-
-
+        }
     }
 
 
