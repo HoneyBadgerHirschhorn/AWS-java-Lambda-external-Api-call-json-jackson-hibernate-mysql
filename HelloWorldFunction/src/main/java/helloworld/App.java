@@ -45,7 +45,7 @@ import java.util.Objects;
 public class App implements RequestHandler<Object, String> {
 
     private static SessionFactory sessionFactory;
-    private static final String apiKey = "e59fb463-529d-4188-8aa6-099b1e7ab9f1";
+    private static final String apiKey = "*****************************";
 
     public String handleRequest(Object thing, Context context) {
 
@@ -162,7 +162,7 @@ public class App implements RequestHandler<Object, String> {
 //
 //        String userName = "admin";
 //        String passWord = "adminadmin";
-//        String sqlUrl = "jdbc:mysql://database-3.cqqfats78sl1.us-east-1.rds.amazonaws.com:3306/Crypto_Stuff";
+//        String sqlUrl = "jdbc:mysql://*****************************.rds.amazonaws.com:3306/Crypto_Stuff";
 //        String trunk = "truncate table currency";
 //
 //        try{
@@ -179,7 +179,7 @@ public class App implements RequestHandler<Object, String> {
 
     public void invoke(){
         //this triggers other lambda
-        String functionName = "arn:aws:lambda:us-east-1:925431479966:function:rules-working-HelloWorldFunction-zbUvlEmsTsKD";
+        String functionName = "arn:aws:lambda:us-east-1:************************************";
         InvokeRequest invokeRequest = new InvokeRequest().withFunctionName(functionName);
         InvokeResult invokeResult = null;
 
