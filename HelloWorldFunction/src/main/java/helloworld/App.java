@@ -41,11 +41,11 @@ import java.util.Objects;
 
 /**
  * Handler for requests to Lambda function.
- */
+ */                                     
 public class App implements RequestHandler<Object, String> {
 
     private static SessionFactory sessionFactory;
-    private static final String apiKey = "*****************************";
+    private static final String apiKey = "******************************";
 
     public String handleRequest(Object thing, Context context) {
 
@@ -179,7 +179,7 @@ public class App implements RequestHandler<Object, String> {
 
     public void invoke(){
         //this triggers other lambda
-        String functionName = "arn:aws:lambda:us-east-1:************************************";
+        String functionName = "arn:aws:lambda:****************************************************";
         InvokeRequest invokeRequest = new InvokeRequest().withFunctionName(functionName);
         InvokeResult invokeResult = null;
 
