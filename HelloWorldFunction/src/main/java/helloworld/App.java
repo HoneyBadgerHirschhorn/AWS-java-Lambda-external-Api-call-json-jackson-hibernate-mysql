@@ -45,7 +45,7 @@ import java.util.Objects;
 public class App implements RequestHandler<Object, String> {
 
     private static SessionFactory sessionFactory;
-    private static final String apiKey = "e59fb463-529d-4188-8aa6-099b1e7ab9f1";
+    private static final String apiKey = "***";
 
     public String handleRequest(Object thing, Context context) {
 
@@ -90,14 +90,13 @@ public class App implements RequestHandler<Object, String> {
                 if (!Objects.equals(sss.get(CurrencyEntity.class, ct), null)){
                     secondCoin = sss.get(CurrencyEntity.class, ct);
                     for (int j = 0; j < root.getData().size(); j ++) {
-                       if (Objects.equals(currencyEntity.getSymbol(), secondCoin.getSymbol())) {
-                        secondCoin.setPrice(currencyEntity.getPrice());
-                        sss.update(secondCoin);
+                        if (Objects.equals(currencyEntity.getSymbol(), secondCoin.getSymbol())) {
+                            secondCoin.setPrice(currencyEntity.getPrice());
+                            sss.update(secondCoin);
                         }
                     }
-
                 }
-            else {
+                else {
                     sss.merge(currencyEntity);
                 }
                 ct++;
@@ -115,7 +114,7 @@ public class App implements RequestHandler<Object, String> {
         if (sss.isOpen()){
             sss.close();
         }
-            if (sessionFactory.isOpen()){
+        if (sessionFactory.isOpen()){
             sessionFactory.close();
         }
         //this triggers second lambda
@@ -124,7 +123,7 @@ public class App implements RequestHandler<Object, String> {
     }
     public static String makeAPICall(String uri, List<NameValuePair> parameters)
         //CoinBase API
-        throws URISyntaxException, IOException {
+            throws URISyntaxException, IOException {
         String response_content = "";
         URIBuilder query = new URIBuilder(uri);
         query.addParameters(parameters);
@@ -157,29 +156,11 @@ public class App implements RequestHandler<Object, String> {
         return sessionFactory.openSession();
     }
 
-//    This was used in an earlier version of the program. Obsolete now.
-//    public static void truncateTable(){
-//
-//        String userName = "admin";
-//        String passWord = "adminadmin";
-//        String sqlUrl = "jdbc:mysql://database-3.cqqfats78sl1.us-east-1.rds.amazonaws.com:3306/Crypto_Stuff";
-//        String trunk = "truncate table currency";
-//
-//        try{
-//            Connection connection = DriverManager.getConnection(sqlUrl, userName, passWord);
-//            Statement statement = connection.createStatement();
-//            statement.executeUpdate(trunk);
-//            statement.close();
-//            connection.close();
-//        } catch (SQLException e) {
-//            throw new RuntimeException(e);
-//        }
-//    }
 
 
     public void invoke(){
         //this triggers other lambda
-        String functionName = "arn:aws:lambda:us-east-1:925431479966:function:rules-working-HelloWorldFunction-zbUvlEmsTsKD";
+        String functionName = "arn:aws:lambda:us-east-1:***:function:rules-working-HelloWorldFunction-***";
         InvokeRequest invokeRequest = new InvokeRequest().withFunctionName(functionName);
         InvokeResult invokeResult = null;
 
@@ -193,8 +174,5 @@ public class App implements RequestHandler<Object, String> {
         }
         System.out.println(Objects.requireNonNull(invokeResult).getStatusCode());
 
-        }
     }
-
-
-
+}
