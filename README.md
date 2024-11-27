@@ -1,0 +1,1 @@
+# AWS-java-Lambda-external-Api-call-json-jackson-hibernate-mysql
